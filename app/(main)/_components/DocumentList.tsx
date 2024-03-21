@@ -63,7 +63,7 @@ export const DocumentList = ({
     <div className="mb-3">
       <p
         style={{
-          paddingLeft: level ? `${level * 12 + 25}px` : undefined,
+          paddingLeft: level ? `${level * 12 + 25}px` : "12px",
         }}
         className={cn(
           "hidden text-sm font-medium text-muted-foreground/80",

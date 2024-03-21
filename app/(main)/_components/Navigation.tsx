@@ -4,6 +4,7 @@ import {
   ChevronsLeft,
   MenuIcon,
   PlusCircle,
+  Plus,
   Search,
   Settings,
 } from "lucide-react";
@@ -15,9 +16,12 @@ import { cn } from "@/lib/utils";
 import { UserItem } from "./UserItem";
 import { Item } from "./Item";
 import { DocumentList } from "./DocumentList";
+import { useCreatePage } from "@/hooks/use-create-page";
 
 export const Navigation = () => {
   const pathname = usePathname();
+  const { createNewPage } = useCreatePage();
+
   const isMobile = useMediaQuery("(max-width: 768px)");
 
   const isResizingRef = useRef(false);
@@ -153,17 +157,12 @@ export const Navigation = () => {
             }}
           />
 
-          <Item
-            onClick={() => {
-              console.log("click");
-            }}
-            label="New page"
-            icon={PlusCircle}
-          />
+          <Item onClick={createNewPage} label="New page" icon={PlusCircle} />
         </div>
 
         <div className="mt-4 ">
           <DocumentList />
+          <Item onClick={createNewPage} label="Add a page" icon={Plus} />
         </div>
 
         <div

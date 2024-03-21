@@ -80,9 +80,9 @@ export const Item = ({
     );
 
     toast.promise(promise, {
-      loading: "Creating a new note...",
-      success: "New note created!",
-      error: "Failed to create a new note.",
+      loading: "Creating a new page...",
+      success: "New page created!",
+      error: "Failed to create a new page.",
     });
   };
 
