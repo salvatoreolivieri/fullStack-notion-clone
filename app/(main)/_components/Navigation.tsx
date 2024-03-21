@@ -10,17 +10,15 @@ import {
 import { usePathname } from "next/navigation";
 import { ElementRef, useRef, useState, useEffect } from "react";
 import { useMediaQuery } from "usehooks-ts";
-import { useQuery } from "convex/react";
 
 import { cn } from "@/lib/utils";
-import { UserItem } from "./user-item";
+import { UserItem } from "./UserItem";
 import { Item } from "./Item";
-import { api } from "@/convex/_generated/api";
+import { DocumentList } from "./DocumentList";
 
 export const Navigation = () => {
   const pathname = usePathname();
   const isMobile = useMediaQuery("(max-width: 768px)");
-  const documents = useQuery(api.documents.getDocuments);
 
   const isResizingRef = useRef(false);
   const sidebarRef = useRef<ElementRef<"aside">>(null);
@@ -165,9 +163,7 @@ export const Navigation = () => {
         </div>
 
         <div className="mt-4 ">
-          {documents?.map(document => (
-            <p key={document._id}>{document.title}</p>
-          ))}
+          <DocumentList />
         </div>
 
         <div
