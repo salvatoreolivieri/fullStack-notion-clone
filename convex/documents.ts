@@ -2,12 +2,29 @@ import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { Doc, Id } from "./_generated/dataModel";
 
-const getIdentity = async ctx => {
+const getIdentity = async (ctx: any) => {
   const identity = await ctx.auth.getUserIdentity();
+  const userId = identity.subject;
 
   if (!identity) throw new Error("Not authenticated");
 
-  return identity;
+  return { userId };
+};
+
+const checkForExistingDocument = async (ctx: any, id: any) => {
+  const existingDocument = await ctx.db.get(id);
+  const { userId } = await getIdentity(ctx);
+
+  // Error handling:
+  if (!existingDocument) {
+    throw new Error("Not found");
+  }
+
+  if (existingDocument.userId !== userId) {
+    throw new Error("Unauthorized");
+  }
+
+  return { existingDocument };
 };
 
 export const create = mutation({
@@ -16,8 +33,7 @@ export const create = mutation({
     parentDocument: v.optional(v.id("documents")),
   },
   handler: async (ctx, args) => {
-    const identity = await getIdentity(ctx);
-    const userId = identity.subject;
+    const { userId } = await getIdentity(ctx);
 
     const document = await ctx.db.insert("documents", {
       title: args.title,
@@ -36,8 +52,7 @@ export const getDocuments = query({
     parentDocument: v.optional(v.id("documents")),
   },
   handler: async (ctx, args) => {
-    const identity = await getIdentity(ctx);
-    const userId = identity.subject;
+    const { userId } = await getIdentity(ctx);
 
     const documents = await ctx.db
       .query("documents")
@@ -57,19 +72,9 @@ export const archive = mutation({
     id: v.id("documents"),
   },
   handler: async (ctx, args) => {
-    const identity = await getIdentity(ctx);
-    const userId = identity.subject;
+    const { userId } = await getIdentity(ctx);
 
-    const existingDocument = await ctx.db.get(args.id);
-
-    // Error handling:
-    if (!existingDocument) {
-      throw new Error("Not found");
-    }
-
-    if (existingDocument.userId !== userId) {
-      throw new Error("Unauthorized");
-    }
+    await checkForExistingDocument(ctx, args.id);
 
     // Recursive function to archive all the children of document
     const recursiveArchive = async (documentId: Id<"documents">) => {
@@ -98,6 +103,77 @@ export const archive = mutation({
 
     recursiveArchive(args.id);
 
+    return document;
+  },
+});
+
+export const getTrash = query({
+  handler: async ctx => {
+    const { userId } = await getIdentity(ctx);
+
+    const documents = await ctx.db
+      .query("documents")
+      .withIndex("by_user", q => q.eq("userId", userId))
+      .filter(q => q.eq(q.field("isArchived"), true))
+      .order("desc")
+      .collect();
+
+    return documents;
+  },
+});
+
+export const restore = mutation({
+  args: { id: v.id("documents") },
+  handler: async (ctx, args) => {
+    const { userId } = await getIdentity(ctx);
+
+    const { existingDocument } = await checkForExistingDocument(ctx, args.id);
+
+    const recursiveRestore = async (documentId: Id<"documents">) => {
+      const children = await ctx.db
+        .query("documents")
+        .withIndex("by_user_parent", q =>
+          q.eq("userId", userId).eq("parentDocument", documentId)
+        )
+        .collect();
+
+      for (const child of children) {
+        await ctx.db.patch(child._id, {
+          isArchived: false,
+        });
+
+        await recursiveRestore(child._id);
+      }
+    };
+
+    const options: Partial<Doc<"documents">> = {
+      isArchived: false,
+    };
+
+    if (existingDocument.parentDocument) {
+      const parent = await ctx.db.get(existingDocument.parentDocument);
+
+      if (parent?.isArchived) {
+        options.parentDocument = undefined;
+      }
+    }
+
+    const document = await ctx.db.patch(args.id, options);
+
+    recursiveRestore(args.id);
+
+    return document;
+  },
+});
+
+export const remove = mutation({
+  args: { id: v.id("documents") },
+  handler: async (ctx, args) => {
+    const { userId } = await getIdentity(ctx);
+
+    const { existingDocument } = await checkForExistingDocument(ctx, args.id);
+
+    const document = await ctx.db.delete(args.id);
     return document;
   },
 });

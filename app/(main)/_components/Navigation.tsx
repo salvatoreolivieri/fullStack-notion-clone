@@ -5,9 +5,15 @@ import {
   MenuIcon,
   PlusCircle,
   Plus,
+  Trash,
   Search,
   Settings,
 } from "lucide-react";
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/components/ui/popover";
 import { usePathname } from "next/navigation";
 import { ElementRef, useRef, useState, useEffect } from "react";
 import { useMediaQuery } from "usehooks-ts";
@@ -15,6 +21,7 @@ import { useMediaQuery } from "usehooks-ts";
 import { cn } from "@/lib/utils";
 import { UserItem } from "./UserItem";
 import { Item } from "./Item";
+import { TrashBox } from "./Trashbox";
 import { DocumentList } from "./DocumentList";
 import { useCreatePage } from "@/hooks/use-create-page";
 
@@ -162,7 +169,21 @@ export const Navigation = () => {
 
         <div className="mt-4 ">
           <DocumentList />
+
           <Item onClick={createNewPage} label="Add a page" icon={Plus} />
+
+          <Popover>
+            <PopoverTrigger className="w-full mt-4">
+              <Item label="Trash" icon={Trash} />
+            </PopoverTrigger>
+
+            <PopoverContent
+              className="p-0 w-72"
+              side={isMobile ? "bottom" : "right"}
+            >
+              <TrashBox />
+            </PopoverContent>
+          </Popover>
         </div>
 
         <div

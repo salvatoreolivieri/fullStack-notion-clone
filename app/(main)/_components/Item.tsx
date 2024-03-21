@@ -29,7 +29,7 @@ import { toast } from "sonner";
 interface ItemProps {
   id?: Id<"documents">;
   label: string;
-  onClick: () => void;
+  onClick?: () => void;
   icon: LucideIcon;
   active?: boolean;
   documentIcon?: string;
