@@ -24,8 +24,10 @@ import { Item } from "./Item";
 import { TrashBox } from "./Trashbox";
 import { DocumentList } from "./DocumentList";
 import { useCreatePage } from "@/hooks/use-create-page";
+import { useSearch } from "@/hooks/use-search";
 
 export const Navigation = () => {
+  const { onOpen: search } = useSearch();
   const pathname = usePathname();
   const { createNewPage } = useCreatePage();
 
@@ -147,14 +149,7 @@ export const Navigation = () => {
         <div>
           <UserItem />
 
-          <Item
-            label="Search"
-            icon={Search}
-            isSearch
-            onClick={() => {
-              console.log("click");
-            }}
-          />
+          <Item label="Search" icon={Search} isSearch onClick={search} />
 
           <Item
             label="Settings"
