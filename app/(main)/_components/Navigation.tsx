@@ -25,9 +25,11 @@ import { TrashBox } from "./Trashbox";
 import { DocumentList } from "./DocumentList";
 import { useCreatePage } from "@/hooks/use-create-page";
 import { useSearch } from "@/hooks/use-search";
+import { useSettings } from "@/hooks/use-settings";
 
 export const Navigation = () => {
-  const { onOpen: search } = useSearch();
+  const { onOpen: openSearchModal } = useSearch();
+  const { onOpen: openSettingsModal } = useSettings();
   const pathname = usePathname();
   const { createNewPage } = useCreatePage();
 
@@ -149,15 +151,14 @@ export const Navigation = () => {
         <div>
           <UserItem />
 
-          <Item label="Search" icon={Search} isSearch onClick={search} />
-
           <Item
-            label="Settings"
-            icon={Settings}
-            onClick={() => {
-              console.log("click");
-            }}
+            label="Search"
+            icon={Search}
+            isSearch
+            onClick={openSearchModal}
           />
+
+          <Item label="Settings" icon={Settings} onClick={openSettingsModal} />
 
           <Item onClick={createNewPage} label="New page" icon={PlusCircle} />
         </div>

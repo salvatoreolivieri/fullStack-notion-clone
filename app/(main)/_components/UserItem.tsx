@@ -15,7 +15,6 @@ import {
 import { useUser, SignOutButton } from "@clerk/clerk-react";
 
 export const UserItem = () => {
-  // Add some functions here...
   const { user } = useUser();
 
   return (
