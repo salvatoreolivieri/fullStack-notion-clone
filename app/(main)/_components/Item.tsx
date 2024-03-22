@@ -96,8 +96,8 @@ export const Item = ({
 
     toast.promise(promise, {
       loading: "Moving to trash...",
-      success: "Note moved to trash!",
-      error: "Failed to archive note.",
+      success: "Page moved to trash!",
+      error: "Failed to archive page.",
     });
   };
 

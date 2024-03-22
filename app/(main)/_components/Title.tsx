@@ -3,6 +3,8 @@
 import { useRef, useState } from "react";
 import { useMutation } from "convex/react";
 
+import { cn } from "@/lib/utils";
+
 import { Doc } from "@/convex/_generated/dataModel";
 import { api } from "@/convex/_generated/api";
 import { Input } from "@/components/ui/input";
@@ -60,14 +62,17 @@ export const Title = ({ initialData }: TitleProps) => {
             onChange={onChange}
             onKeyDown={onKeyDown}
             value={title}
-            className="h-7 px-2 focus-visible:ring-transparent"
+            className="h-6 ml-1 px-2 focus-visible:ring-transparent"
           />
         ) : (
           <Button
             onClick={enableInput}
             variant="ghost"
             size="sm"
-            className="font-normal h-auto pr-1"
+            className={cn(
+              "border border-transparent font-normal h-auto ",
+              initialData.icon && "pr-1"
+            )}
           >
             <span className="truncate"> {initialData.title}</span>
           </Button>
