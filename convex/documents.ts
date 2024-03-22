@@ -169,9 +169,8 @@ export const restore = mutation({
 export const remove = mutation({
   args: { id: v.id("documents") },
   handler: async (ctx, args) => {
-    const { userId } = await getIdentity(ctx);
-
-    const { existingDocument } = await checkForExistingDocument(ctx, args.id);
+    await getIdentity(ctx);
+    await checkForExistingDocument(ctx, args.id);
 
     const document = await ctx.db.delete(args.id);
     return document;
@@ -190,5 +189,46 @@ export const getSearch = query({
       .collect();
 
     return documents;
+  },
+});
+
+export const getDocumentById = query({
+  args: { documentId: v.id("documents") },
+  handler: async (ctx, args) => {
+    const { userId } = await getIdentity(ctx);
+
+    const document = await ctx.db.get(args.documentId);
+
+    // error handling
+    if (!document) throw new Error("Not found");
+
+    if (document.isPublished && !document.isArchived) return document;
+
+    if (document.userId !== userId) throw new Error("Unauthorized");
+
+    return document;
+  },
+});
+
+export const updateDocument = mutation({
+  args: {
+    id: v.id("documents"),
+    title: v.optional(v.string()),
+    content: v.optional(v.string()),
+    coverImage: v.optional(v.string()),
+    icon: v.optional(v.string()),
+    isPublished: v.optional(v.boolean()),
+  },
+  handler: async (ctx, args) => {
+    await getIdentity(ctx);
+    await checkForExistingDocument(ctx, args.id);
+
+    const { id, ...rest } = args;
+
+    const document = await ctx.db.patch(args.id, {
+      ...rest,
+    });
+
+    return document;
   },
 });
