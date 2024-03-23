@@ -14,10 +14,12 @@ export const useCoverImage = create<CoverImageStore>(set => ({
   onOpen: () =>
     set({
       isOpen: true,
+      url: undefined,
     }),
   onClose: () =>
     set({
       isOpen: false,
+      url: undefined,
     }),
   onReplace: (url: string) =>
     set({

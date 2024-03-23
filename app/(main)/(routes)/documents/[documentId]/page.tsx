@@ -8,7 +8,7 @@ import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { Toolbar } from "@/components/Toolbar";
 import { Cover } from "@/components/Cover";
-// import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface DocumentIdPageProps {
   params: {
@@ -17,12 +17,40 @@ interface DocumentIdPageProps {
 }
 
 const DocumentIdPage = ({ params }: DocumentIdPageProps) => {
+  const Editor = useMemo(
+    () =>
+      dynamic(() => import("@/components/Editor"), {
+        ssr: false,
+      }),
+    []
+  );
+
   const document = useQuery(api.documents.getDocumentById, {
     documentId: params.documentId,
   });
 
+  const update = useMutation(api.documents.updateDocument);
+
+  const onChange = (content: string) =>
+    update({
+      id: params.documentId,
+      content,
+    });
+
   if (!document) {
-    return <div>Loading</div>;
+    return (
+      <div>
+        <Cover.Skeleton />
+        <div className="md:max-w-3xl lg:max-w-4xl mx-auto">
+          <div className="space-y-4 pl-8 pt-4">
+            <Skeleton className="h-14 w-[50%]" />
+            <Skeleton className="h-4 w-[80%]" />
+            <Skeleton className="h-4 w-[40%]" />
+            <Skeleton className="h-4 w-[60%]" />
+          </div>
+        </div>
+      </div>
+    );
   }
 
   if (document === null) {
@@ -37,7 +65,7 @@ const DocumentIdPage = ({ params }: DocumentIdPageProps) => {
         <div className="md:max-w-3xl lg:max-w-4xl mx-auto">
           <Toolbar initialData={document} />
 
-          {/* <Editor onChange={onChange} initialContent={document.content} /> */}
+          <Editor onChange={onChange} initialContent={document.content} />
         </div>
       </div>
     </>
