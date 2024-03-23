@@ -4,9 +4,9 @@ import { Doc, Id } from "./_generated/dataModel";
 
 const getIdentity = async (ctx: any) => {
   const identity = await ctx.auth.getUserIdentity();
-  const userId = identity.subject;
 
   if (!identity) throw new Error("Not authenticated");
+  const userId = identity.subject;
 
   return { userId };
 };
@@ -195,8 +195,6 @@ export const getSearch = query({
 export const getDocumentById = query({
   args: { documentId: v.id("documents") },
   handler: async (ctx, args) => {
-    const { userId } = await getIdentity(ctx);
-
     const document = await ctx.db.get(args.documentId);
 
     // error handling
@@ -204,6 +202,7 @@ export const getDocumentById = query({
 
     if (document.isPublished && !document.isArchived) return document;
 
+    const { userId } = await getIdentity(ctx);
     if (document.userId !== userId) throw new Error("Unauthorized");
 
     return document;
