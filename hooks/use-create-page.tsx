@@ -7,7 +7,7 @@ export const useCreatePage = () => {
   const router = useRouter();
   const create = useMutation(api.documents.create);
 
-  const createNewPage = (documentId?: string) => {
+  const createNewPage = () => {
     const promise = create({ title: "untitled" }).then(documentId => {
       router.push(`/documents/${documentId}`);
     });
